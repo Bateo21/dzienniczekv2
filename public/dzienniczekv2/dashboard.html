@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biathlon Tracker</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Biathlon Tracker</h1>
+        <h2 id="club-name">Dynamit 1985</h2> <!-- Ta wartość będzie zmieniana dynamicznie -->
+        <div class="grid-container">
+            <div class="grid-item">
+                <img src="../../image/dzienniczek.PNG" alt="Dzienniczek" class="icon"/>
+                <button>Dzienniczek</button>
+            </div>
+            <div class="grid-item">
+                <img src="../../image/addActivity.PNG" alt="Dodanie aktywności" class="icon"/>
+                <button onclick="window.location.href='addActivity.html'">Dodanie aktywności</button>
+            </div>
+            <div class="grid-item">
+                <img src="../../image/podsumowanie.PNG" alt="Podsumowania" class="icon"/>
+                <button>Statystyki</button>
+            </div>
+            <div class="grid-item">
+                <img src="../../image/wyniki.PNG" alt="Wyniki" class="icon"/>
+                <button>Wyniki</button>
+            </div>
+            <div class="grid-item">
+                <img src="../../image/zawodnicy.PNG" alt="Zawodnicy" class="icon"/>
+                <button onclick="window.location.href='zawodnicy.html'">Zawodnicy</button>
+            </div>
+            <div class="grid-item">
+                <img src="../../image/planyCele.PNG" alt="Plany i cele" class="icon"/>
+                <button>Plany i cele</button>
+            </div>
+            <div class="grid-item">
+                <img src="../../image/analizaStrzelectwa.PNG" alt="Analiza strzelectwa" class="icon"/>
+                <button>Analiza strzelectwa</button>
+            </div>
+            <div class="grid-item">
+                <img src="../../image/notatkiZadania.PNG" alt="Notatki i zadania" class="icon"/>
+                <button>Notatki i zadania</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/dzienniczekv2/dzienniczek.html';  // Jeśli brak tokenu, przekierowujemy
+                return;
+            }
+
+            const decoded = jwt_decode(token);
+            const clubId = decoded.clubId;  // Pobieramy clubId z tokenu
+
+            // Ustawiamy nazwę klubu w <h2>
+            const clubName = clubId === 1 ? "Dynamit 1985" : clubId === 2 ? "Power Team" : "Nieznany klub";  // Przykładowe przypisanie klubów
+            document.getElementById('club-name').textContent = clubName;  // Zmiana tekstu w <h2>
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elektroniczny Dzienniczek Treningowy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Dodanie aktywności</h1>
+
+        <form id="training-form">
+            <div class="form-group">
+                <label for="athlete">Zawodnik</label>
+                <select id="athlete" name="athlete" placeholder="Wybierz zawodnika" required>
+                    <option value="" disabled selected>-- Wybierz zawodnika --</option>
+                    <!-- Opcje zawodników będą dodane dynamicznie -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Data treningu</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="training-type">Typ treningu</label>
+                <select id="training-type" name="training-type" required>
+                    <option value="" disabled selected>-- Wybierz dyscyplinę --</option>
+                    <option value="bieg">Bieg</option>
+                    <option value="imitacja">Imitacja</option>
+                    <option value="kolarstwo">Kolarstwo</option>
+                    <option value="nartorolki">Nartorolki</option>
+                    <option value="biegi narciarskie">Biegi Narciarskie</option>
+                    <option value="ćwiczenia ogólnorozwojowe">Ćwiczenia ogólnorozwojowe</option>
+                    <option value="strzelanie">Strzelanie</option>
+                    <option value="siłownia">Siłownia</option>
+                    <option value="rozciąganie">Rozciąganie</option>
+                    <option value="pływanie">Pływanie</option>
+                    <option value="turystyka piesza">Turystyka piesza</option>
+                    <option value="trening obwodowy">Trening obwodowy</option>
+                    <option value="nieokreślony">Nieokreślony</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="nartorolki-options" style="display: none;">
+                <label for="nartorolki-type">Rodzaj nartorolek</label>
+                <select id="nartorolki-type" name="nartorolki-type">
+                    <option value="lyzwa">Łyżwa</option>
+                    <option value="klasyk">Klasyk</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="imitacja-options" style="display: none;">
+                <label for="imitacja-type">Rodzaj imitacji</label>
+                <select id="imitacja-type" name="imitacja-type">
+                    <option value="skakana">Skakana</option>
+                    <option value="wchodzona">Wchodzona</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="bieg-options" style="display: none;">
+                <label for="bieg-type">Rodzaj biegu</label>
+                <select id="bieg-type" name="bieg-type">
+                    <option value="dlugodystansowy">Długodystansowy</option>
+                    <option value="interwalowy">Interwałowy</option>
+                    <option value="tempowy">Tempowy</option>
+                    <option value="silowy">Siłowy</option>
+                    <option value="regeneracyjny">Regeneracyjny</option>
+                    <option value="fartlek">Fartlek</option>
+                    <option value="marszobieg">Marszobieg</option>
+                </select>
+            </div>
+
+            <!-- Aktywności -->
+            <div class="form-group">
+                <label for="activity">Aktywność</label>
+                <br>
+                <div class="activity-group">
+                    <label for="distance">Dystans (km)</label>
+                    <input type="number" id="distance" name="distance" placeholder="Wprowadź dystans" required>
+                </div>
+                <div class="activity-group">
+                    <label for="duration">Czas trwania (min)</label>
+                    <input type="number" id="duration" name="duration" placeholder="Wprowadź czas trwania" required>
+                </div>
+            </div>
+
+            <!-- Średnie tętno -->
+            <div class="form-group">
+                <label for="average-heart-rate">Średnie tętno (bpm)</label>
+                <input type="number" id="average-heart-rate" name="average-heart-rate" placeholder="Wprowadź średnie tętno">
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notatka (opcjonalnie)</label>
+                <textarea id="notes" name="notes" placeholder="Dodatkowe informacje..."></textarea>
+            </div>
+
+            <button type="submit">Zapisz Trening</button>
+        </form>
+
+        <!-- Zapisy treningowe -->
+        <h3>Zapisy treningowe</h3>
+        <div>
+            <label for="filter-athlete">Wybierz zawodnika:</label>
+            <select id="filter-athlete">
+                <option value="all">Wszyscy</option>
+                <!-- Opcje będą dodane dynamicznie -->
+            </select>
+        </div>
+
+        <div id="training-records" class="records-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        // Pobieranie zawodników z serwera i dodanie do listy rozwijanej
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/dzienniczekv2/dzienniczek.html';
+                return;
+            }
+
+            const decoded = jwt_decode(token);
+            const clubId = decoded.clubId;  // Pobieramy clubId z tokenu
+
+            // Wysyłamy zapytanie do serwera, aby pobrać zawodników dla danego trenera
+            fetch(`/api/athletes?clubId=${clubId}`)
+                .then(res => res.json())
+                .then(athletes => {
+                    // Czyszczenie listy rozwijanej
+                    const athleteSelect = document.getElementById('athlete');
+                    athleteSelect.innerHTML = "<option value='' disabled selected>-- Wybierz zawodnika --</option>";
+                    athletes.forEach(athlete => {
+                        const opt = document.createElement("option");
+                        opt.value = athlete.name;
+                        opt.textContent = athlete.name;
+                        athleteSelect.appendChild(opt);
+                    });
+
+                    // Dynamicznie wypełniamy filtr
+                    const filterSelect = document.getElementById('filter-athlete');
+                    filterSelect.innerHTML = '<option value="all">Wszyscy</option>';
+                    athletes.forEach(athlete => {
+                        const opt = document.createElement("option");
+                        opt.value = athlete.name;
+                        opt.textContent = athlete.name;
+                        filterSelect.appendChild(opt);
+                    });
+                })
+                .catch(err => {
+                    console.error("Błąd pobierania zawodników: ", err);
+                });
+
+            // Filtrowanie treningów
+            const filterSelect = document.getElementById("filter-athlete");
+            filterSelect.addEventListener("change", function () {
+                const selectedAthlete = this.value;
+                const filteredRecords = selectedAthlete === "all" ? trainingRecords : trainingRecords.filter(record => record.athlete === selectedAthlete);
+
+                // Oczyść poprzednie zapisy
+                document.getElementById("training-records").innerHTML = '';
+
+                // Wyświetl przefiltrowane dane
+                filteredRecords.forEach(record => displayTrainingData(record));
+            });
+
+            // Pobieranie treningów
+            fetch('/api/trainings')
+                .then(res => res.json())
+                .then(data => {
+                    trainingRecords = data;
+                    renderTrainingsForSelectedAthlete();
+                });
+
+            // Zmieniono select zawodnika
+            const athleteSelect = document.getElementById('athlete');
+            athleteSelect.addEventListener('change', renderTrainingsForSelectedAthlete);
+        });
+    </script>
+</body>
+</html>
